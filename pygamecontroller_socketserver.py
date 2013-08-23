@@ -37,19 +37,31 @@ PORT = 50001              # Arbitrary non-privileged port
 
 # create host socket
 try:
+	# IP4, STREAM socket (TCP)
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 except socket.error, msg:
 	print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
 	sys.exit();
 
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reuse socket in case already in use
-s.bind((HOST, PORT))
+# set socket to reuse socket
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+# bind socket to address and port
+try:
+	s.bind((HOST, PORT))
+except socket.error , msg:
+	print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+	sys.exit()
+
 s.listen(1) # only allow 1 connection in queue
 
 # wait for client to connect
 print 'waiting for client to connect'
 conn, addr = s.accept()
-print 'Connected by', addr
+print 'Connected with ' + addr[0] + ':' + str(addr[1])
+
+# once we've created a connection socket from the server, we can close the server
+s.close()
 
 # Loop until the user clicks the close button
 done = False
@@ -122,14 +134,19 @@ while not done:
 	# Update screen after all drawing commands
 	pygame.display.flip()
 
-	# Send data to client
+	# receive data from receiver
 	# print 'waiting to receive data...'
 	# ack = conn.recv(1024)
 	# print 'received', ack
-	# print 'sending', x,y,z
-	conn.sendall(pack('ddd', x, y, z))
-	# conn.sendall(str(x) + ',' + str(y) + ',' + str(z))
-	# print 'sent', x,y,z
+
+	# Send data to receiver
+	try:
+		print 'sending', x,y,z
+		conn.sendall(pack('ddd', x, y, z))
+	except socket.error:
+		print 'Send failed'
+		sys.exit()
+	print 'sent', x,y,z
 
 conn.close()
 pygame.quit()
