@@ -37,8 +37,14 @@ null_box.center = (width/2, height/2) # set center of box at center
 HOST = 'localhost'	# Symbolic name meaning all available interfaces
 PORT = 50001						# Arbitrary non-privileged port
 
-# create client socket and connect to host
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# create socket 
+try:
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error, msg:
+	print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+	sys.exit();
+
+# connect socket to server 
 s.connect((HOST, PORT))
 
 # Will loop until the user clicks the close button

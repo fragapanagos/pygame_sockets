@@ -6,7 +6,12 @@ HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50001              # Arbitrary non-privileged port
 
 # create host socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error, msg:
+	print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+	sys.exit();
+
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reuse socket in case already in use
 s.bind((HOST, PORT))
 s.listen(1) # only allow 1 connection in queue

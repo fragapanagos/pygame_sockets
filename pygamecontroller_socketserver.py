@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 import socket
 from struct import pack, unpack
+import sys
 
 def clip(a, minimum, maximum):
 	return max(minimum, min(a, maximum))
@@ -35,7 +36,12 @@ HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50001              # Arbitrary non-privileged port
 
 # create host socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error, msg:
+	print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+	sys.exit();
+
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reuse socket in case already in use
 s.bind((HOST, PORT))
 s.listen(1) # only allow 1 connection in queue
@@ -118,8 +124,8 @@ while not done:
 
 	# Send data to client
 	# print 'waiting to receive data...'
-	ack = conn.recv(1024)
-	# print 'received', len(ack)
+	# ack = conn.recv(1024)
+	# print 'received', ack
 	# print 'sending', x,y,z
 	conn.sendall(pack('ddd', x, y, z))
 	# conn.sendall(str(x) + ',' + str(y) + ',' + str(z))
