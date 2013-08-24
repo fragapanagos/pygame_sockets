@@ -1,4 +1,5 @@
 import socket
+import sys
 from struct import unpack
 
 # socket parameters
@@ -12,11 +13,20 @@ except socket.error, msg:
 	print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
 	sys.exit();
 
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reuse socket in case already in use
-s.bind((HOST, PORT))
+# set socket to reuse socket
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+# bind socket to address and port
+try:
+	s.bind((HOST, PORT))
+except socket.error, msg:
+	print 'Bind failed. Error Code : ' + str(msg[0]) + ' Error message ' + msg[1]
+	sys.exit()
+
 s.listen(1) # only allow 1 connection in queue
 
 # wait for client to connect
+print 'waiting for client to connect'
 conn, addr = s.accept()
 s.close()
 print 'Connected by', addr
@@ -29,10 +39,10 @@ while not done:
 
 	# run until we stop receiving data
 	if not data:
+		print 'controller closed, terminating receiver'
 		done = True
 	else:
-		# print 'Received', repr(unpack('ddd', data))
-		print 'Received', data
+		print 'Received', repr(unpack('ddd', data))
 
 # close socket
 conn.close()
