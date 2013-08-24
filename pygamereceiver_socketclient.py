@@ -48,4 +48,4 @@ while not done:
 		print 'Received', repr(unpack('ddd', data))
 
 # close socket
-# s.close()
+s.close()

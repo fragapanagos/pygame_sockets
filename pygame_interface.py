@@ -1,11 +1,12 @@
-import pygame
-import pygame
-import numpy as np
-import socket
-from struct import pack, unpack
+"""Defines pygame controller class"""
 import sys
+import pygame
+import socket
+import numpy as np
+from struct import pack, unpack
 
 def clip(a, minimum, maximum):
+	"""clips a value to within a range"""
 	return max(minimum, min(a, maximum))
 
 # Define some colors for controller window
@@ -17,7 +18,15 @@ RED		= (255,   0,   0)
 
 class PyGameController(object):
 	"""Controller that uses a pygame window as a user interface"""
+
 	def __init__(self, max_signal=3., deadzone_scale=.2, max_loop_speed=10):
+		"""Create a controller.
+
+		Args:
+			max_signal (float): set the maximum absolute command value to send
+			deadzone_scale (float): set the fraction of the window center to not affect the controller output
+			max_loop_speed (float): set the maximum number of loops run by the controller per second
+		"""
 		# width and height of pygame window
 		self.width = 800
 		self.height = 800
@@ -41,7 +50,11 @@ class PyGameController(object):
 		pygame.display.flip()
 
 	def run(self, conn):
+		"""Run the controller.
 
+		Args:
+			conn (socket): socket object to read/write data to
+		"""
 		# Run until the user clicks the close button
 		done = False
 		
