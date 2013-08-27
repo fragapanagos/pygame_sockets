@@ -11,9 +11,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define PORT "3490"  // the port users will be connecting to
+#define PORT "50001"  // the port users will be connecting to
 
-#define BACKLOG 10	 // how many pending connections queue will hold
+#define BACKLOG 1	 // how many pending connections queue will hold
 
 void sigchld_handler(int s)
 {
@@ -53,18 +53,19 @@ int main(void)
 
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype,
-				p->ai_protocol)) == -1) {
+		// attempt to create the socket
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
 			perror("server: socket");
 			continue;
 		}
 
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
+		// set socket to reuse address
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
 			exit(1);
 		}
 
+		// bind socket to port
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
@@ -74,13 +75,16 @@ int main(void)
 		break;
 	}
 
+	// did we find a port to bind to?
 	if (p == NULL)  {
 		fprintf(stderr, "server: failed to bind\n");
 		return 2;
 	}
 
-	freeaddrinfo(servinfo); // all done with this structure
+	// free the servinfo linked list. we're done with it
+	freeaddrinfo(servinfo); 
 
+	// listen for connections on socket
 	if (listen(sockfd, BACKLOG) == -1) {
 		perror("listen");
 		exit(1);
@@ -104,9 +108,7 @@ int main(void)
 			continue;
 		}
 
-		inet_ntop(their_addr.ss_family,
-			get_in_addr((struct sockaddr *)&their_addr),
-			s, sizeof s);
+		inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
 		printf("server: got connection from %s\n", s);
 
 		if (!fork()) { // this is the child process

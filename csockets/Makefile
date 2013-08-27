@@ -9,10 +9,10 @@ CFLAGS += -g -Wall -O0 -ggdb
 
 all: client server
 
-client:
+client: $(CLIENT_SOURCES)
 	$(CC) $(CFLAGS) $(CLIENT_SOURCES) -o client
 
-server:
+server: $(SERVER_SOURCES)
 	$(CC) $(CFLAGS) $(SERVER_SOURCES) -o server
 
 .PHONY: clean
